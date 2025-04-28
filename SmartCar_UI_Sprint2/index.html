@@ -2,21 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Smart Car Interface</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Car Dashboard</title>
+    <link rel="stylesheet" href="style.css">  <!-- Vincula tu archivo CSS -->
 </head>
 <body>
 
-    <div class="container">
-        <h1>Smart Car Control Panel</h1>
-
-        <div class="buttons">
-            <button>Navigation</button>
-            <button>Music</button>
-            <button>Climate</button>
-            <button>Settings</button>
+    <div class="grid">
+        <!-- Cuadro para sonido detectado y acción -->
+        <div class="square" id="info">
+            <p><strong>Detected Sound:</strong> <span id="sound">---</span></p>
+            <p><strong>Action:</strong> <span id="action">---</span></p>
         </div>
+        <!-- Otros cuadros -->
+        <div class="square">Music</div>
+        <div class="square">Climate</div>
+        <div class="square">Settings</div>
     </div>
+
+    <script>
+        // Conexión WebSocket a Node-RED
+        const socket = new WebSocket('ws://localhost:1880/smartcar');  // Asegúrate de que la URL coincida con la configuración de Node-RED
+
+        // Cuando recibimos un mensaje WebSocket
+        socket.onmessage = function(event) {
+            try {
+                // Parseamos el mensaje JSON recibido
+                const data = JSON.parse(event.data); 
+
+                // Actualizamos el contenido en la página con los datos del WebSocket
+                document.getElementById('sound').textContent = data.payload || 'No Sound Detected';  // Muestra el sonido detectado
+                document.getElementById('action').textContent = data.action || 'No Action';  // Muestra la acción
+            } catch (error) {
+                console.error('Error parsing WebSocket message:', error);
+            }
+        };
+
+        // Si hay algún error en la conexión WebSocket
+        socket.onerror = function(error) {
+            console.log("WebSocket Error: " + error);
+        };
+
+        // Si el WebSocket se abre correctamente
+        socket.onopen = function() {
+            console.log("WebSocket connection established");
+        };
+    </script>
 
 </body>
 </html>
